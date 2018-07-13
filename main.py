@@ -1,5 +1,4 @@
 import socket
-import readline
 import time
 import json
 import sys
@@ -82,7 +81,8 @@ class RBSocket:
         self.dest_ip = dest_ip
         self.server = server
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, 12, 6)
+        if sys.platform.startswith("linux"):
+            self.sock.setsockopt(socket.SOL_SOCKET, 12, 6)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1)
         self.sock.bind(('', 0))
         self.write_counter = 0
