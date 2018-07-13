@@ -82,6 +82,8 @@ class RBSocket:
         self.dest_ip = dest_ip
         self.server = server
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, 12, 6)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1)
         self.sock.bind(('', 0))
         self.write_counter = 0
         self.read_counter = 0
@@ -90,11 +92,20 @@ class RBSocket:
         msg["n"] = self.write_counter
         self.write_counter += 1
         msg = json.dumps(msg)
-        self.sock.sendto(msg.encode("utf-8"), (self.dest_ip, BROADCAST_PORT))
+        try:
+            self.sock.sendto(msg.encode("utf-8"), (self.dest_ip, BROADCAST_PORT))
+        except Exception as e:
+            print(e)
 
     def process(self):
         while True:
-            msg, addr = self.sock.recvfrom(65535)
+            try:
+                msg, addr = self.sock.recvfrom(65535)
+            except Exception as e:
+                print(e)
+                time.sleep(0.1)
+                continue
+
             try:
                 msg = msg.decode("utf-8").replace("\n", "\\n")
                 msg = json.loads(msg)
